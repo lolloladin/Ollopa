@@ -159,6 +159,12 @@
     <None Include="Resources\off.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\1.wav" />
+    <None Include="Resources\2.wav" />
+    <None Include="Resources\3.wav" />
+    <None Include="Resources\4.wav" />
+    <None Include="Resources\5.wav" />
+    <None Include="Resources\6.wav" />
     <Content Include="Sounds\1.wav" />
     <Content Include="Sounds\2.wav" />
     <Content Include="Sounds\3.wav" />

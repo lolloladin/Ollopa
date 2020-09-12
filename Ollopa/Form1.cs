@@ -15,24 +15,32 @@ namespace Ollopa
     
     public partial class MainForm : Form
     {
-        
         int power;
         int paka;
         int pressure;
         int temperature;
         int pr1;
         int pr2;
-        int blikanec;
+        bool blikanec;
+        bool blikej;
         int alarm;
         int alarm2;
         int counter;
         int kyslik;
-        int stopka =0;
+        int stopka = 0;
+
+        SoundPlayer splayer = new SoundPlayer(Properties.Resources.S1);
+        SoundPlayer splayer2 = new SoundPlayer(Properties.Resources.S2);
+        SoundPlayer splayer3 = new SoundPlayer(Properties.Resources.S3);
+        SoundPlayer splayer4 = new SoundPlayer(Properties.Resources.S4);
+        SoundPlayer splayer5 = new SoundPlayer(Properties.Resources.S5);
+        SoundPlayer splayer6 = new SoundPlayer(Properties.Resources.S6);
+
+
         public MainForm()
         {
-            SoundPlayer splayer = new SoundPlayer(@"C:\Sounds\1.wav");
-            splayer.PlayLooping();
             InitializeComponent();
+
             kyslik = 30;
             power = 0;
             Kokpit.Image = Properties.Resources.Kokpit_finallightoff2;
@@ -62,20 +70,19 @@ namespace Ollopa
             extended.Image = Properties.Resources.Extended;
             extended.Visible = false;
             kyslikleft.Visible = false;
-           
-            
-            System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer() { Interval = 100, Enabled = true };
+            blikej = false;
+
+            splayer.PlayLooping();
+
+
+            /*System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer() { Interval = 100, Enabled = true };
             timer.Tick += new EventHandler(Blikačka_Tick);
 
             System.Windows.Forms.Timer timer2 = new System.Windows.Forms.Timer() { Interval = 1000, Enabled = true };
-            timer2.Tick += new EventHandler(Oxygen_Tick);
-
-
-
+            timer2.Tick += new EventHandler(Oxygen_Tick);*/
 
         }
-        SoundPlayer splayer2 = new SoundPlayer(@"C:\Sounds\4.wav");
-        SoundPlayer splayer3 = new SoundPlayer(@"C:\Sounds\3.wav");
+        
 
         private void Enginebutton_Click(object sender, EventArgs e)
         {
@@ -85,15 +92,18 @@ namespace Ollopa
             temperature = 0;
             pr1 = 0;
             pr2 = 0;
-            blikanec = 0;
+            blikanec = false;
             alarm = 0;
             alarm2 = 0;
             counter = 0;
 
 
-            splayer2.Play();
-            Thread.Sleep(100);
-            splayer3.PlayLooping();
+            Task.Run(() =>
+            {
+                splayer2.Play();
+                Thread.Sleep(100);
+                splayer3.PlayLooping();
+            });
 
             Kokpit.Image = Properties.Resources.Kokpit_final;
             PalubniPC1.Image = Properties.Resources.palubka1;
@@ -281,38 +291,21 @@ namespace Ollopa
                 MessageBox.Show("ERROR", "ERROR");
             }
         }
-        SoundPlayer splayer5 = new SoundPlayer(@"C:\Sounds\5.wav");
-        SoundPlayer splayer6 = new SoundPlayer(@"C:\Sounds\6.wav");
+        
         private void Blikačka_Tick(object sender, EventArgs e)
         {
-
-            
-
             if (pressure == 2)
             {
-                
                 if (alarm == 0)
                 {
                     splayer5.Play();
                     alarm = 1;
                     counter = 0;
                 }
+
                 counter++;
 
-                if (blikanec == 0)
-                {
-                    Ledlight.Visible = true;
-                    blikanec++;
-                }
-                else if (blikanec == 1)
-                {
-                    Ledlight.Visible = false;
-                    blikanec--;
-                }
-                else
-                {
-                    MessageBox.Show("Error", "Blikačka");
-                }
+                blikej = true;
             }
             else
             {
@@ -323,8 +316,8 @@ namespace Ollopa
                 alarm = 0;
                 Ledlight.Visible = false;                
                 counter = 0;
-               
-                
+
+                //blikej = false; // ASI, zkontroluj
             }
             if (counter == 24)
             {
@@ -345,51 +338,17 @@ namespace Ollopa
                 pressur.Visible = false;
                 charging.Visible = false;
                 panelydisplej.Visible = false;
+                blikej = false;
+                Ledlight.Visible = false;
 
                 MessageBox.Show("Konec hry: Loď explodovala, kvůli vysokému tlaku","Konec");
                 Application.Exit();
             }
-           
-           
-
-            
-            
         }
 
         private void Oxygen_Tick(object sender, EventArgs e)
         {
-          if (kyslik < 16 && kyslik >0)
-            {
-                
-                
-
-                if (blikanec == 0 || blikanec ==1)
-                {
-                    Ledlight.Visible = true;
-                    blikanec++;
-                    
-                }
-                else if (blikanec == 2)
-                {
-                    Ledlight.Visible = false;
-                    blikanec = blikanec-2;
-                }
-                else
-                {
-                    MessageBox.Show("Error", "Blikačka");
-                }
-            
-            
-            
-
-          }
-          else
-          {
-               
-                Ledlight.Visible = false;
-               
-
-          }
+            blikej = kyslik < 16 && kyslik < 0;
             
             
             if (kyslik == 0 && stopka ==0)
@@ -413,6 +372,19 @@ namespace Ollopa
                     kyslikleft.Text = "0 %";
                 }
                                
+            }
+        }
+
+        private void Blinker_Tick(object sender, EventArgs e)
+        {
+            if (blikej)
+            {
+                blikanec = !blikanec;
+                Ledlight.Visible = blikanec;
+            }
+            else
+            {
+                Ledlight.Visible = false;
             }
         }
     }
